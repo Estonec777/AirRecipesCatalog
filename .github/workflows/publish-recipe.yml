@@ -1,0 +1,28 @@
+name: Publish AirRecipes recipe
+
+on:
+  issues:
+    types: [opened]
+
+permissions:
+  contents: read
+
+jobs:
+  publish:
+    if: >-
+      github.event.sender.login == 'Estonec777' &&
+      github.event.issue.user.login == 'Estonec777' &&
+      startsWith(github.event.issue.body, '<!-- AIRRECIPES_PUBLISH_V1 -->')
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    timeout-minutes: 3
+    steps:
+      - name: Read trusted publishing script
+        uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - name: Validate request and update catalog
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: node scripts/publish-issue.mjs
