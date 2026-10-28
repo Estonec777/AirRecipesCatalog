@@ -17,14 +17,17 @@
     .recipe{width:100%;background:#2c3239;color:white;text-align:left;margin-bottom:9px;display:block;font-weight:500}.recipe.active{outline:2px solid #eab96a}
     .muted{color:#aeb6c0;font-size:.9rem}.form-grid{display:grid;grid-template-columns:1fr 1fr;gap:0 14px}.wide{grid-column:1/-1}
     .form-actions{display:flex;gap:10px;flex-wrap:wrap;margin-top:14px}.status{white-space:pre-wrap;line-height:1.5;color:#acd6b4}
+    .tabs{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:5px;margin:14px 0 20px}.tabs button{font-size:.85rem;padding:10px 3px;background:#343a42;color:#fff}.tabs button.active{background:#eab96a;color:#161616}
+    .step-section[hidden]{display:none}.editor-message{padding:12px;border-radius:8px;margin:10px 0;background:#303c35;color:#c6f6d2;white-space:pre-wrap}.editor-message.error{background:#422d30;color:#ffc6c6}
+    .form-actions{position:sticky;bottom:0;padding:12px 0;background:#21262c;border-top:1px solid #41464e;z-index:2}.form-actions button{flex:1;min-width:120px}
     .error{color:#ffaaa7}.tag{font-size:.8rem;color:#eab96a}.thumbnail{max-width:190px;max-height:130px;border-radius:8px;object-fit:cover;display:none}
-    @media(max-width:750px){.layout{grid-template-columns:1fr}.form-grid{grid-template-columns:1fr}}
+    @media(max-width:750px){.layout{grid-template-columns:1fr}.form-grid{grid-template-columns:1fr}header{padding:20px}main{padding:16px 12px 40px}.panel{padding:16px}.actions>*{flex:1 1 45%;text-align:center}button,.file-button{min-height:44px}.tabs button{font-size:.75rem}}
   </style>
 </head>
 <body>
   <header><h1>AirRecipes · Адмінпанель</h1><p>Підготовка рецептів для загального каталогу</p></header>
   <main>
-    <div class="notice">🔒 Панель працює у твоєму браузері. Вона <strong>не має доступу до GitHub</strong> та не запитує токени. Після редагування завантаж <code>catalog.json</code>, перевір зміни й опублікуй файл у своєму репозиторії через GitHub.</div>
+    <div class="notice">🔒 Рецепти й чернетки автоматично зберігаються <strong>на цьому пристрої</strong>. Щоб вони з’явилися в AirRecipes у всіх користувачів, окремо завантаж <code>catalog.json</code> та опублікуй його через GitHub. Панель не запитує токени.</div>
     <div class="actions">
       <button id="loadOnline">Завантажити чинний каталог</button>
       <label class="file-button" for="file" style="margin:0;cursor:pointer">Відкрити JSON із комп’ютера</label><input id="file" type="file" accept=".json,application/json" hidden>
@@ -36,7 +39,14 @@
       <section class="panel"><h2>Рецепти <span id="count" class="tag">0</span></h2><div id="recipes"></div><h3>Видалені ID</h3><p class="muted" id="deletedCount">0</p></section>
       <section class="panel" id="editor" hidden>
         <h2 id="editorTitle">Рецепт</h2>
+        <nav class="tabs" aria-label="Розділи рецепта">
+          <button type="button" data-tab="main" class="active">Основне</button>
+          <button type="button" data-tab="ingredients">Продукти</button>
+          <button type="button" data-tab="steps">Кроки</button>
+          <button type="button" data-tab="photo">Фото</button>
+        </nav>
         <div class="form-grid">
+          <div class="wide step-section form-grid" data-section="main">
           <label class="wide">Назва<input id="title" required maxlength="140" placeholder="Броколі з пармезаном"></label>
           <label>Постійний ID (не змінюй після публікації)<input id="id" placeholder="online-broccoli-001"></label>
           <label>Категорія<input id="category" placeholder="Овочі"></label>
@@ -45,12 +55,20 @@
           <label>Порції<input id="servings" type="number" min="1" max="100"></label>
           <label>Зона<select id="zone"><option value="none">Не задано</option><option value="left">Ліва</option><option value="right">Права</option></select></label>
           <label>Час готування в чаші, хв<input id="zoneMinutes" type="number" min="1" max="600"></label>
+          </div>
+          <div class="wide step-section" data-section="ingredients" hidden>
           <label class="wide">Інгредієнти — кожен з нового рядка<textarea id="ingredients"></textarea></label>
+          </div>
+          <div class="wide step-section" data-section="steps" hidden>
           <label class="wide">Кроки приготування — один крок на рядок<textarea id="steps" style="min-height:170px"></textarea></label>
           <label class="wide">Опис і примітки щодо перевірки<textarea id="description"></textarea></label>
+          </div>
+          <div class="wide step-section" data-section="photo" hidden>
           <label class="wide">Посилання на WebP у каталозі<input id="photo" placeholder="https://raw.githubusercontent.com/Estonec777/AirRecipesCatalog/main/images/назва-v1.webp"></label>
           <div class="wide"><img id="thumbnail" class="thumbnail" alt="Попередній перегляд фото"><p class="muted">Спочатку завантаж фото в папку <code>images/</code> на GitHub. Рекомендовано WebP до 1 МБ. Для заміни фото використовуй нову назву файла.</p></div>
+          </div>
         </div>
+        <p id="editorMessage" class="editor-message" role="alert" hidden></p>
         <div class="form-actions"><button id="save">Зберегти рецепт</button><button id="remove" class="danger">Видалити з каталогу</button></div>
       </section>
     </div>
@@ -64,9 +82,22 @@
     const $=id=>document.getElementById(id);
     const fields=['id','title','category','duration','temperature','servings','ingredients','steps','description','photo'];
     let catalog={schemaVersion:1,catalogVersion:1,recipes:[],deletedIds:[]};
-    let selected=-1, dirty=false, loaded=false;
+    const storageKey='airrecipes-admin-draft-v2';
+    let selected=-1, dirty=false, loaded=false, newDraft=null;
     let publishedIds=new Set();
     const status=(message,error=false)=>{$('status').textContent=message;$('status').className=error?'status error':'status'};
+    const editorMessage=(message,error=false)=>{const el=$('editorMessage');el.hidden=!message;el.textContent=message;el.className='editor-message'+(error?' error':'')};
+    const saveLocal=()=>{
+      if(!loaded)return;
+      const form=selected!==-1?Object.fromEntries([...fields,'zone','zoneMinutes'].map(id=>[id,$(id).value])):null;
+      try{localStorage.setItem(storageKey,JSON.stringify({catalog,dirty,publishedIds:[...publishedIds],selected,newDraft,form}))}
+      catch(e){status('Не вдалося зберегти на пристрої (можливо, браузер забороняє сховище). Завантаж JSON для резервної копії.',true)}
+    };
+    const showTab=name=>{
+      document.querySelectorAll('[data-section]').forEach(el=>el.hidden=el.dataset.section!==name);
+      document.querySelectorAll('[data-tab]').forEach(el=>{el.classList.toggle('active',el.dataset.tab===name);el.setAttribute('aria-pressed',String(el.dataset.tab===name))});
+    };
+    document.querySelectorAll('[data-tab]').forEach(button=>button.onclick=()=>showTab(button.dataset.tab));
     const parseCatalog=data=>{
       if(!data||data.schemaVersion!==1||!Number.isSafeInteger(data.catalogVersion)||data.catalogVersion<1||!Array.isArray(data.recipes)||!Array.isArray(data.deletedIds))throw Error('Некоректний формат каталогу або версія схеми.');
       const ids=new Set();
@@ -82,24 +113,25 @@
       if(r.temperature&&(!/^\d+$/.test(r.temperature)||Number(r.temperature)<50||Number(r.temperature)>250))throw Error('Температура має бути від 50 до 250 °C.');
       if(r.photo&&(!r.photo.startsWith(photoPrefix)||!/^https:\/\/raw\.githubusercontent\.com\/Estonec777\/AirRecipesCatalog\/main\/images\/[a-zA-Z0-9_-]+\.webp$/.test(r.photo)))throw Error('Фото має бути WebP із дозволеної папки images/ цього каталогу.');
     };
-    const markChanged=()=>{catalog.catalogVersion++;dirty=true;status(`Зміни збережено локально. Нова версія каталогу: ${catalog.catalogVersion}. Завантаж JSON і опублікуй його через GitHub.`)};
+    const markChanged=()=>{catalog.catalogVersion++;dirty=true;status(`Збережено на цьому пристрої. Каталог версії ${catalog.catalogVersion}. Для публікації завантаж JSON і відправ його через GitHub.`);editorMessage('✓ Рецепт збережено на цьому пристрої. Для інших користувачів потрібна публікація через GitHub.');saveLocal()};
     const render=()=>{
       const list=$('recipes');list.replaceChildren();$('count').textContent=String(catalog.recipes.length);$('deletedCount').textContent=String(catalog.deletedIds.length);
       catalog.recipes.forEach((r,i)=>{const button=document.createElement('button');button.className='recipe'+(i===selected?' active':'');button.textContent=r.title||r.id;button.onclick=()=>select(i);list.append(button)});
-      $('editor').hidden=selected<0;
+      $('editor').hidden=selected===-1;
     };
     const select=i=>{
-      selected=i;const r=catalog.recipes[i];render();$('editorTitle').textContent=r.title||'Новий рецепт';
+      selected=i;const r=i===-2?newDraft:catalog.recipes[i];render();$('editorTitle').textContent=r.title||'Новий рецепт';
       for(const id of fields)$(id).value=id==='steps'?(r.steps||[]).join('\n'):String(r[id]??'');
       $('zone').value=r.zones?.mode==='single'?(r.zones.left?'left':r.zones.right?'right':'none'):'none';
-      $('id').readOnly=publishedIds.has(r.id);$('remove').disabled=false;
+      $('id').readOnly=publishedIds.has(r.id);$('remove').textContent=i===-2?'Скасувати':'Видалити з каталогу';$('remove').disabled=false;
       $('zoneMinutes').value=String(r.zones?.left?.minutes??r.zones?.right?.minutes??r.duration??'');
       $('thumbnail').style.display='none';
       if(r.photo?.startsWith(photoPrefix)){$('thumbnail').src=r.photo;$('thumbnail').style.display='block'}
+      editorMessage('');showTab('main');saveLocal();
     };
     const load=data=>{
       if(dirty&&!confirm('Незбережені зміни буде втрачено. Продовжити?'))return;
-      catalog=parseCatalog(data);publishedIds=new Set(catalog.recipes.map(r=>r.id));selected=-1;dirty=false;loaded=true;render();status(`Завантажено каталог: версія ${catalog.catalogVersion}, рецептів: ${catalog.recipes.length}.`)
+      catalog=parseCatalog(data);publishedIds=new Set(catalog.recipes.map(r=>r.id));selected=-1;newDraft=null;dirty=false;loaded=true;render();saveLocal();status(`Завантажено каталог: версія ${catalog.catalogVersion}, рецептів: ${catalog.recipes.length}.`)
     };
     $('loadOnline').onclick=async()=>{
       try{status('Завантажую…');const response=await fetch(catalogUrl+'?t='+Date.now(),{cache:'no-store'});if(!response.ok)throw Error('HTTP '+response.status);load(await response.json())}
@@ -108,12 +140,12 @@
     $('file').onchange=async e=>{const f=e.target.files?.[0];if(!f)return;try{load(JSON.parse(await f.text()))}catch(error){status(error.message,true)}e.target.value=''};
     $('add').onclick=()=>{
       if(!loaded){status('Спочатку завантаж чинний каталог, щоб не стерти попередні рецепти.',true);return}
-      const r={id:'',title:'',ingredients:'',steps:[],duration:'15',temperature:'180',description:'',photo:'',favorite:false,category:'Овочі',servings:2,sourceLanguage:'uk'};
-      catalog.recipes.push(r);select(catalog.recipes.length-1);
+      newDraft={id:'online-recipe-'+Date.now().toString(36),title:'',ingredients:'',steps:[],duration:'15',temperature:'180',description:'',photo:'',favorite:false,category:'Овочі',servings:2,sourceLanguage:'uk'};
+      select(-2);$('editor').scrollIntoView({behavior:'smooth',block:'start'});
     };
     $('save').onclick=()=>{
       try{
-        const old=catalog.recipes[selected];if(!old)throw Error('Вибери рецепт.');
+        const old=selected===-2?newDraft:catalog.recipes[selected];if(!old)throw Error('Вибери рецепт.');
         const r={...old};for(const id of fields)r[id]=$(id).value.trim();
         r.steps=r.steps.split('\n').map(s=>s.trim()).filter(Boolean);r.servings=Number(r.servings);r.favorite=false;r.sourceLanguage='uk';
         const zone=$('zone').value;
@@ -125,10 +157,13 @@
         }
         validateRecipe(r,catalog.recipes.filter((_,i)=>i!==selected).map(x=>x.id));
         if(publishedIds.has(old.id)&&old.id!==r.id)throw Error('ID опублікованого рецепта не можна змінювати.');
-        catalog.recipes[selected]=r;markChanged();select(selected)
-      }catch(e){status(e.message,true)}
+        if(selected===-2){catalog.recipes.push(r);newDraft=null;selected=catalog.recipes.length-1}
+        else catalog.recipes[selected]=r;
+        select(selected);markChanged();$('editor').scrollIntoView({behavior:'smooth',block:'start'})
+      }catch(e){editorMessage('Не збережено: '+e.message,true);$('editorMessage').scrollIntoView({behavior:'smooth',block:'center'});status('Помилка у формі: '+e.message,true)}
     };
     $('remove').onclick=()=>{
+      if(selected===-2){newDraft=null;selected=-1;render();saveLocal();return}
       const r=catalog.recipes[selected];if(!r)return;
       if(!confirm(`Видалити «${r.title||r.id}» із загального каталогу?`))return;
       if(publishedIds.has(r.id)&&!catalog.deletedIds.includes(r.id))catalog.deletedIds.push(r.id);
@@ -144,6 +179,19 @@
         status('Файл catalog.json завантажено. Перед публікацією переглянь зміни та переконайся, що всі фото вже завантажено на GitHub.')
       }catch(e){status(e.message,true)}
     };
+    $('editor').addEventListener('input',()=>{
+      if(selected===-2&&newDraft){for(const id of fields)newDraft[id]=id==='steps'?$('steps').value.split('\n'):$(id).value}
+      saveLocal();
+    });
+    $('editor').addEventListener('change',saveLocal);
+    try{
+      const saved=localStorage.getItem(storageKey);
+      if(saved){const data=JSON.parse(saved);catalog=parseCatalog(data.catalog);loaded=true;dirty=Boolean(data.dirty);publishedIds=new Set(data.publishedIds||[]);newDraft=data.newDraft||null;selected=Number.isInteger(data.selected)?data.selected:-1;
+        if(selected===-2&&!newDraft||selected>=catalog.recipes.length)selected=-1;
+        if(selected!==-1){select(selected);if(data.form)for(const [id,value]of Object.entries(data.form))if($(id))$(id).value=value}
+        status('Відновлено рецепти та чернетку з пам’яті цього пристрою. Зміни ще не опубліковані.');
+      }
+    }catch(e){status('Локальну чернетку не вдалося відновити. Завантаж каталог із GitHub.',true)}
     render();
   })();
   </script>
