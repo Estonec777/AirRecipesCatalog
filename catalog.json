@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "catalogVersion": 2,
+  "catalogVersion": 3,
   "recipes": [
     {
       "id": "online-chicken-drumsticks-001",
@@ -31,5 +31,6 @@
         }
       }
     }
-  ]
+  ],
+  "deletedIds": []
 }
