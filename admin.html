@@ -27,7 +27,7 @@
 <body>
   <header><h1>AirRecipes · Адмінпанель</h1><p>Підготовка рецептів для загального каталогу</p></header>
   <main>
-    <div class="notice">🔒 Рецепти й чернетки автоматично зберігаються <strong>на цьому пристрої</strong>. Щоб вони з’явилися в AirRecipes у всіх користувачів, окремо завантаж <code>catalog.json</code> та опублікуй його через GitHub. Панель не запитує токени.</div>
+    <div class="notice">🔒 Рецепти й чернетки зберігаються на цьому пристрої. Кнопка <strong>«Опублікувати через GitHub»</strong> відкриє заповнену заявку. Ти перевіриш її та підтвердиш створення в GitHub — тільки після цього автоматизація зможе оновити каталог. Паролі та токени тут не потрібні.</div>
     <div class="actions">
       <button id="loadOnline">Завантажити чинний каталог</button>
       <label class="file-button" for="file" style="margin:0;cursor:pointer">Відкрити JSON із комп’ютера</label><input id="file" type="file" accept=".json,application/json" hidden>
@@ -69,7 +69,7 @@
           </div>
         </div>
         <p id="editorMessage" class="editor-message" role="alert" hidden></p>
-        <div class="form-actions"><button id="save">Зберегти рецепт</button><button id="remove" class="danger">Видалити з каталогу</button></div>
+        <div class="form-actions"><button id="save">Зберегти рецепт</button><button id="publish" class="secondary">Опублікувати через GitHub</button><button id="remove" class="danger">Видалити з каталогу</button></div>
       </section>
     </div>
   </main>
@@ -123,7 +123,7 @@
       selected=i;const r=i===-2?newDraft:catalog.recipes[i];render();$('editorTitle').textContent=r.title||'Новий рецепт';
       for(const id of fields)$(id).value=id==='steps'?(r.steps||[]).join('\n'):String(r[id]??'');
       $('zone').value=r.zones?.mode==='single'?(r.zones.left?'left':r.zones.right?'right':'none'):'none';
-      $('id').readOnly=publishedIds.has(r.id);$('remove').textContent=i===-2?'Скасувати':'Видалити з каталогу';$('remove').disabled=false;
+      $('id').readOnly=publishedIds.has(r.id);$('remove').textContent=i===-2?'Скасувати':'Видалити з каталогу';$('remove').disabled=false;$('publish').disabled=i===-2;
       $('zoneMinutes').value=String(r.zones?.left?.minutes??r.zones?.right?.minutes??r.duration??'');
       $('thumbnail').style.display='none';
       if(r.photo?.startsWith(photoPrefix)){$('thumbnail').src=r.photo;$('thumbnail').style.display='block'}
@@ -168,6 +168,22 @@
       if(!confirm(`Видалити «${r.title||r.id}» із загального каталогу?`))return;
       if(publishedIds.has(r.id)&&!catalog.deletedIds.includes(r.id))catalog.deletedIds.push(r.id);
       catalog.recipes.splice(selected,1);selected=-1;markChanged();render()
+    };
+    $('publish').onclick=()=>{
+      try{
+        if(selected<0)throw Error('Спочатку збережи рецепт.');
+        const recipe=catalog.recipes[selected];
+        validateRecipe(recipe,catalog.recipes.filter((_,i)=>i!==selected).map(r=>r.id));
+        if(fields.some(id=>id==='steps'?$('steps').value.trim()!==(recipe.steps||[]).join('\n'):String($(id).value).trim()!==String(recipe[id]??'')))throw Error('Є незбережені зміни. Спочатку натисни «Зберегти рецепт».');
+        const payload=JSON.stringify({action:'upsert',recipe},null,2);
+        const body='<!-- AIRRECIPES_PUBLISH_V1 -->\n\n```json\n'+payload+'\n```\n\nПеревір рецепт перед натисканням **Submit new issue**. Ця дія запустить публікацію до загального каталогу.';
+        const link='https://github.com/'+repo+'/issues/new?'+new URLSearchParams({title:'Опублікувати: '+recipe.title,body}).toString();
+        if(link.length>7000)throw Error('Рецепт завеликий для посилання GitHub. Скороти опис або скористайся ручним експортом JSON.');
+        const tab=window.open(link,'_blank');
+        if(!tab)throw Error('Браузер заблокував відкриття GitHub. Дозволь спливаючі вкладки й спробуй ще раз.');
+        tab.opener=null;
+        editorMessage('Відкрито GitHub. Перевір назву й текст заявки та натисни «Submit new issue» під своїм акаунтом Estonec777. Після успішної автоматизації рецепт буде в онлайн-каталозі.');
+      }catch(e){editorMessage(e.message,true)}
     };
     $('export').onclick=()=>{
       try{
