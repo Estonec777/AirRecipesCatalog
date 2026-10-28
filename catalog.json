@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "catalogVersion": 3,
+  "catalogVersion": 4,
   "recipes": [
     {
       "id": "online-chicken-drumsticks-001",
@@ -17,7 +17,7 @@
       "duration": "35",
       "temperature": "190",
       "description": "4 порції. Рецепт для Xiaomi Dual Zone 10L, права чаша. Параметри орієнтовні: фактичний час залежить від розміру ніжок, завантаження кошика й попереднього розігрівання. Статус: адаптовано, практичну перевірку автором ще не підтверджено.",
-      "photo": "",
+      "photo": "https://raw.githubusercontent.com/Estonec777/AirRecipesCatalog/main/images/chicken-drumsticks-v1.webp",
       "favorite": false,
       "category": "Птиця",
       "servings": 4,
