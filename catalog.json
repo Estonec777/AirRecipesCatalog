@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "catalogVersion": 5,
+  "catalogVersion": 6,
   "recipes": [
     {
       "id": "online-chicken-drumsticks-001",
@@ -17,7 +17,7 @@
       "duration": "35",
       "temperature": "190",
       "description": "4 порції. Рецепт для Xiaomi Dual Zone 10L, права чаша. Параметри орієнтовні: фактичний час залежить від розміру ніжок, завантаження кошика й попереднього розігрівання. Статус: адаптовано, практичну перевірку автором ще не підтверджено.",
-      "photo": "https://raw.githubusercontent.com/Estonec777/AirRecipesCatalog/main/images/chicken-drumsticks-v1.webp",
+      "photo": "https:\/\/raw.githubusercontent.com\/Estonec777\/AirRecipesCatalog\/main\/images\/chicken-drumsticks-v1.webp",
       "favorite": false,
       "category": "Птиця",
       "servings": 4,
@@ -46,7 +46,7 @@
       "duration": "15",
       "temperature": "180",
       "description": "2 порції. Рецепт для Xiaomi Dual Zone 10L, ліва чаша. Час приготування орієнтовно 8–12 хвилин і залежить від розміру суцвіть. Статус: адаптовано, практичну перевірку автором ще не підтверджено.",
-      "photo": "https://raw.githubusercontent.com/Estonec777/AirRecipesCatalog/main/images/broccoli-parmesan-v1.webp",
+      "photo": "https:\/\/raw.githubusercontent.com\/Estonec777\/AirRecipesCatalog\/main\/images\/broccoli-parmesan-v1.webp",
       "favorite": false,
       "category": "Овочі",
       "servings": 2,
@@ -58,6 +58,28 @@
           "temperatureC": 180,
           "minutes": 10
         }
+      }
+    },
+    {
+      "id": "online-d7f984eb-571c-4fc3-b7d3-6d84ee51685f",
+      "title": "Хрустка картопля з куркою в аерогрилі",
+      "ingredients": "300 г курячого філе\n400 г картоплі\n1,5 ст. л. олії\n1 ч. л. паприки\n½ ч. л. сушеного часнику\nСіль, перець за смаком\nІталійські трави за бажанням",
+      "steps": [
+        "3. Готуй картоплю.\nРозігрій аерогриль до 190°C. Виклади картоплю на 12–15 хвилин, потім переверни.\n4. Додай курку.\nГотуй усе разом ще 12–15 хвилин за 190°C. Перемішай посередині. Курка має досягти 74°C всередині, а картопля стати м'якою та рум'яною."
+      ],
+      "duration": "35",
+      "temperature": "180",
+      "description": "",
+      "photo": "",
+      "favorite": false,
+      "category": "Птиця",
+      "servings": 1,
+      "sourceLanguage": "uk",
+      "nutritionOverride": {
+        "calories": 250,
+        "protein": 20,
+        "fat": 15,
+        "carbs": 10
       }
     }
   ],
