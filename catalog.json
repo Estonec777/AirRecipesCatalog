@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "catalogVersion": 8,
+  "catalogVersion": 9,
   "recipes": [
     {
       "id": "online-chicken-drumsticks-paprika-001",
@@ -43,7 +43,7 @@
       ],
       "duration": "22",
       "description": "Ніжний запечений лосось із лимоном. Один кошик: права зона 6,5 л. Час залежить від товщини філе.",
-      "photo": "",
+      "photo": "https://raw.githubusercontent.com/Estonec777/AirRecipesCatalog/main/images/online-salmon-lemon-001.webp",
       "favorite": false,
       "category": "Риба та морепродукти",
       "servings": 2,
