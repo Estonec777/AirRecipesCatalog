@@ -1,7 +1,65 @@
 {
   "schemaVersion": 1,
-  "catalogVersion": 10,
-  "recipes": [],
+  "catalogVersion": 11,
+  "recipes": [
+    {
+      "id": "online-07738ea8-bad9-4e4a-b71c-8e8f28c0c6f9",
+      "title": "Курячі стегна з хрусткою картоплею",
+      "ingredients": "Курячі стегна — 400 г\nКартопля — 500 г\nОливкова олія — 20 мл\nПаприка солодка — 5 г\nЧасник сушений — 3 г\nСіль — 5 г\nЧорний перець — 1 г\nРозмарин сушений — 1 г",
+      "steps": [
+        "Помий 500 г картоплі та наріж часточками завтовшки приблизно 1,5–2 см. Добре обсуши паперовим рушником.",
+        "Обсуши 400 г курячих стегон без кісток. Додай 10 мл оливкової олії, половину паприки, сушений часник, частину солі та чорний перець. Ретельно перемішай.",
+        "Змішай картоплю з рештою оливкової олії, паприки, солі та сушеним розмарином. Перемішай, щоб спеції рівномірно покрили всі часточки.",
+        "У лівий кошик (3,5 л) виклади картоплю. У правий кошик (6,5 л) поклади курячі стегна. Розмісти продукти вільно, не перекриваючи циркуляцію гарячого повітря.",
+        "Ліва зона L: 200 °C, 28 хвилин. Права зона R: 190 °C, 22 хвилини. Увімкни режим SYNC для одночасного завершення приготування. Без SYNC запусти картоплю приблизно на 6 хвилин раніше.",
+        "Приблизно посередині приготування струсни картоплю та переверни курячі стегна. За потреби продовж приготування. Перед подачею дай курці відпочити 3 хвилини."
+      ],
+      "duration": "28",
+      "temperature": "",
+      "description": "",
+      "photo": "https:\/\/raw.githubusercontent.com\/Estonec777\/AirRecipesCatalog\/main\/images\/admin-f112d0d7-7ca5-4bbb.webp",
+      "favorite": false,
+      "category": "Комплексні страви",
+      "servings": 2,
+      "sourceLanguage": "uk",
+      "prepTimeMinutes": 15,
+      "zones": {
+        "mode": "independent",
+        "left": {
+          "food": "Картопля",
+          "temperatureC": 200,
+          "minutes": 28,
+          "category": "Картопля та гарніри"
+        },
+        "right": {
+          "food": "Курячі стегна",
+          "temperatureC": 190,
+          "minutes": 22,
+          "category": "Птиця"
+        }
+      },
+      "ingredientNutrition": {
+        "0": {
+          "grams": 400,
+          "calories": 130,
+          "protein": 20,
+          "fat": 6,
+          "carbs": 0
+        },
+        "7": {
+          "grams": 1,
+          "calories": 330,
+          "protein": 4.9,
+          "fat": 15.2,
+          "carbs": 64
+        }
+      },
+      "stepPhotos": {
+        "0": "https:\/\/raw.githubusercontent.com\/Estonec777\/AirRecipesCatalog\/main\/images\/admin-step-61b5d4da-33db-4157.webp",
+        "3": "https:\/\/raw.githubusercontent.com\/Estonec777\/AirRecipesCatalog\/main\/images\/admin-step-f0f7fe66-4738-4262.webp"
+      }
+    }
+  ],
   "deletedIds": [
     "online-broccoli-parmesan-001",
     "online-chicken-drumsticks-001",
